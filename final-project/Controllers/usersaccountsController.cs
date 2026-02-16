@@ -1,0 +1,408 @@
+﻿using final_project.Data;
+using final_project.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
+
+namespace final_project.Controllers
+{
+    public class usersaccountsController : Controller
+    {
+        private readonly final_projectContext _context;
+
+        public usersaccountsController(final_projectContext context)
+        {
+            _context = context;
+        }
+
+        // GET: usersaccounts
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.usersaccounts.ToListAsync());
+        }
+
+        // GET: usersaccounts/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "admin")
+            {
+                return RedirectToAction("login", "usersaccounts");
+            }
+
+            var usersaccounts = await _context.usersaccounts
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (usersaccounts == null)
+            {
+                return NotFound();
+            }
+
+            return View(usersaccounts);
+        }
+
+        // GET: usersaccounts/Create
+        public IActionResult Create() { 
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "admin") {
+            return RedirectToAction("customer");
+            }
+            return View();
+        }
+
+        //searchall GET
+        [HttpGet]
+        public IActionResult searchall()
+        {
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "admin")
+            {
+                return RedirectToAction("login", "usersaccounts");
+            }
+            return View(new List<usersaccounts>());  
+        }
+
+
+        //searchall POST action
+        [HttpPost]
+        public IActionResult searchall(string role, string na)
+
+        {
+           
+            var data = _context.usersaccounts
+                .FromSqlRaw("SELECT id,name, pass,role FROM usersaccounts WHERE name = {0} and role = {1}", na , role)
+                .ToList();
+
+            return View(data);
+        }
+
+
+
+        //login view 
+        public IActionResult Login()
+        {
+            return View();
+        }
+        //login post action
+        [HttpPost, ActionName("login")]
+        public async Task<IActionResult> login(string na, string pa)
+        {
+            var NoSqlInjection = await _context.usersaccounts.FirstOrDefaultAsync(u => u.name == na && u.pass == pa); 
+            if (NoSqlInjection != null)
+            {
+            
+                int id = NoSqlInjection.Id;
+                string na1 = NoSqlInjection.name;
+                string ro = NoSqlInjection.role;
+                HttpContext.Session.SetString("userid", Convert.ToString(id));
+                HttpContext.Session.SetString("Name", na1);
+                HttpContext.Session.SetString("Role", ro);
+
+                if (ro == "customer")
+                    return RedirectToAction("customer");
+                else if (ro == "admin")
+                    return RedirectToAction("admin");
+                else
+                    return View();
+            }
+            else
+            {
+                ViewData["Message"] = "wrong user name password";
+                return View();
+            }
+        }
+        public IActionResult admin()
+        {
+
+
+            var role = HttpContext.Session.GetString("Role");
+            var name = HttpContext.Session.GetString("Name");
+
+            if (role != "admin")
+            {
+                return RedirectToAction("login", "usersaccounts");
+            }
+
+            return View();
+        }
+        //customer page 
+        public async Task<IActionResult> customer()
+        {
+            var role = HttpContext.Session.GetString("Role");
+
+            if (role == null)
+            {
+
+                return RedirectToAction("login", "usersaccounts");
+            }
+            return View(await _context.items.ToListAsync());
+        }
+
+        //create post
+
+  
+
+
+
+
+
+        // POST: usersaccounts/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string na, string pa, string confpass)
+        {
+            if (pa != confpass)
+            {
+                ViewData["message"] = "Passwords do not match!";
+                return View();
+            }
+
+            var existing = await _context.usersaccounts
+                .FromSqlRaw("SELECT * FROM usersaccounts WHERE name = {0}", na)
+                .FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                ViewData["message"] = "Username already exists!";
+                return View();
+            }
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO usersaccounts (name, pass, role) VALUES ({0}, {1}, {2})",
+                na, pa, "admin"
+            );
+
+            ViewData["success"] = "User successfully created!";
+            return View();
+        }
+
+
+        // GET: usersaccounts/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "admin")
+            {
+                return RedirectToAction("login", "usersaccounts");
+            }
+
+            var usersaccounts = await _context.usersaccounts.FindAsync(id);
+            if (usersaccounts == null)
+            {
+                return NotFound();
+            }
+            return View(usersaccounts);
+        }
+
+        // POST: usersaccounts/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,name,pass,role")] usersaccounts usersaccounts)
+        {
+            if (id != usersaccounts.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(usersaccounts);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!usersaccountsExists(usersaccounts.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(usersaccounts);
+        }
+
+        // GET: usersaccounts/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "admin")
+            {
+                return RedirectToAction("login", "usersaccounts");
+            }
+
+            var usersaccounts = await _context.usersaccounts
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (usersaccounts == null)
+            {
+                return NotFound();
+            }
+
+            return View(usersaccounts);
+        }
+
+        // POST: usersaccounts/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var usersaccounts = await _context.usersaccounts.FindAsync(id);
+            if (usersaccounts != null)
+            {
+                _context.usersaccounts.Remove(usersaccounts);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool usersaccountsExists(int id)
+        {
+            return _context.usersaccounts.Any(e => e.Id == id);
+        }
+    
+        public IActionResult Email()
+        {
+            HttpContext.Session.LoadAsync();
+           if (HttpContext.Session.GetString("Role") != "admin") { 
+                return RedirectToAction("login", "usersaccounts");
+            }
+            return View();
+        }
+        [HttpPost]
+        public IActionResult SendEmail(string email, string sub, string message)
+        {
+            try
+            {
+
+                var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("hhshd7067@gmail.com", "yhlddexxktarknlg"),
+                    EnableSsl = true
+                };
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("hhshd7067@gmail.com"),
+                    Subject = sub,
+                    Body = message,
+                    IsBodyHtml = true
+                };
+
+                mailMessage.To.Add(email);
+
+
+                smtpClient.Send(mailMessage);
+
+              
+
+                TempData["EmailStatus"] = "DONE!";  
+                return RedirectToAction("Email");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error {ex.Message}");
+            }
+        }
+
+
+        //registration view
+
+        public IActionResult registration()
+        {
+            return View();
+        }
+
+        //registation post
+
+        [HttpPost]
+        public async Task<IActionResult> registration(customer cli, string pass,string confpass)
+        {
+            // check if client name exists
+            var existing = await _context.customers
+                .FromSqlRaw("SELECT * FROM customer WHERE name = {0}", cli.name)
+                .FirstOrDefaultAsync();
+            if (pass != confpass) {
+
+                ViewData["message"] = "the passwords don't match!";
+                return View();
+            
+            }
+            if (existing != null)
+            {
+                ViewData["message"] = "name already exists";
+                return View();
+            }
+
+            // Insert into customer table
+            await _context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO customer (name, email, job, married, gender,location) VALUES ({0}, {1}, {2}, {3}, {4},{5})",
+                cli.name, cli.email, cli.job, cli.married, cli.gender,cli.location
+            );
+
+           
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO usersaccounts (name, pass,role) VALUES ({0}, {1},{2})",
+                cli.name, pass, "customer"
+            );
+
+            ViewData["success"] = "Successfully added (customer + useraccount)";
+            return View();
+        }
+
+
+
+        
+        public IActionResult logout()
+        {
+            HttpContext.Session.Clear();
+
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+
+            return RedirectToAction("login", "usersaccounts");
+        }
+
+        public IActionResult SearchAPI()
+        {
+            return View();
+        }
+
+    }
+
+}
+

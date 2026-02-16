@@ -1,0 +1,151 @@
+﻿@model IEnumerable<final_project.Models.CategoryStat>
+
+@{
+    Layout = "_Layoutadmin";
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    body {
+        background-color: #0d1117; /* خلفية سوداء للصفحة */
+        color: #e0e7f1; /* نص أبيض مزرق فاتح */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h1 {
+        text-align: center;
+        color: #00b0ff;
+        font-weight: bold;
+        margin: 30px 0;
+        letter-spacing: 1.5px;
+    }
+
+    .card {
+        background-color: #1a1f29; /* كروت داكنة */
+        color: #e0e7f1;
+        border-radius: 12px;
+        box-shadow: 0 0 10px #00b0ff44;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px #00b0ff66;
+        }
+
+    .card-header {
+        font-weight: bold;
+        font-size: 16px;
+        color: #000; /* النص داخل الهيدر إذا كان bg-warning يكون مقروء */
+    }
+
+    .card-body h3 {
+        font-size: 28px;
+        font-weight: bold;
+        color: #00b0ff;
+    }
+
+    #chart_div {
+        margin: auto;
+        background-color: #1a1f29;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px #00b0ff44;
+    }
+
+    .row {
+        margin-top: 20px;
+    }
+</style>
+
+<h1>@ViewData["Title"]</h1>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Category');
+        data.addColumn('number', 'Cars');
+
+        data.addRows([
+        @foreach (var cat in Model)
+        {
+                    @: ['Category @cat.Category', @cat.Count],
+        }
+        ]);
+
+        var options = {
+            title: 'Number of Cars per Category',
+            width: 500,
+            height: 350,
+            backgroundColor: '#1a1f29',
+            titleTextStyle: { color: '#00b0ff', fontSize: 18 },
+            legendTextStyle: { color: '#e0e7f1' }
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+    }
+</script>
+
+<div class="row">
+    <div class="col-md-6">
+        <div id="chart_div"></div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="row">
+            @foreach (var cat in Model)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header bg-warning text-center">
+                            Category @cat.Category
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="@cat.ImageUrl"
+                                 width="80"
+                                 height="80"
+                                 style="object-fit:cover; border-radius:8px;"
+                                 alt="Category Image"
+                                 onerror="this.src='/images/noimage.png';" />
+                        </div>
+                        <div class="card-footer text-center">
+                            Number of Cars:
+                            <div>@cat.Count</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <br />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white text-center">
+                        Total Items
+                    </div>
+                    <div class="card-body text-center">
+                        <h3>@ViewData["totalItems"]</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white text-center">
+                        Sold Quantity
+                    </div>
+                    <div class="card-body text-center">
+                        <h3>@ViewData["soldQty"]</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,145 @@
+﻿@{
+    Layout = "_Layoutadmin";
+    ViewData["Title"] = "Send Email";
+}
+@{
+    var emailStatus = TempData["EmailStatus"];
+}
+@if (emailStatus != null)
+{
+    <div class="alert alert-success">
+        @emailStatus
+    </div>
+}
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #0d1117; /* Dark page background */
+        color: #cfd8dc; /* Light text */
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 700px;
+        margin: 50px auto;
+        background-color: #1a1f29; /* Dark form box */
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px #00b0ff44; /* Soft blue glow */
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .form-header h1 {
+            font-size: 26px;
+            color: #00b0ff;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #81d4fa; /* Light blue */
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #00b0ff;
+            border-radius: 6px;
+            background-color: #0d1117;
+            color: #cfd8dc;
+            font-size: 16px;
+        }
+
+            .form-group input:focus, .form-group textarea:focus {
+                outline: none;
+                border-color: #00e5ff;
+                box-shadow: 0 0 6px #00e5ff;
+            }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+    .button {
+        background-color: #00b0ff;
+        color: #0d1117;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        display: inline-flex;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+        .button svg {
+            margin-right: 8px;
+        }
+
+        .button:hover {
+            background-color: #00e5ff;
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 25px;
+        color: #81d4fa;
+        font-size: 14px;
+    }
+</style>
+
+<div class="container">
+    <div class="form-header">
+        <h1>Send Email</h1>
+    </div>
+
+    <form asp-action="SendEmail" method="post">
+        <div class="form-group">
+            <label for="Email">Customer Email</label>
+            <input type="email" id="Email" name="Email" placeholder="Enter customer email" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Subject">Subject</label>
+            <input type="text" id="Subject" name="sub" placeholder="Enter email subject" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Message">Message</label>
+            <textarea id="Message" name="Message" placeholder="Enter your message" required></textarea>
+        </div>
+
+        <button class="button" type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 12l18 9l-6-9l6-9l-18 9z" />
+            </svg>
+            Send
+        </button>
+    </form>
+
+    <div class="form-footer">
+        <small>Use this form to send emails to your customers easily.</small>
+    </div>
+</div>

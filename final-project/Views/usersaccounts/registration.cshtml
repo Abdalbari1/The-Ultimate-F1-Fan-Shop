@@ -1,0 +1,150 @@
+﻿@model final_project.Models.customer
+@{
+    ViewData["Title"] = "registration";
+    Layout = null;
+}
+<head>
+    <style>
+        body {
+            background-image: url('https://images3.alphacoders.com/139/thumb-1920-1397249.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .register-box {
+            background-color: rgba(248, 248, 248, 0.7);
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            width: 350px;
+            text-align: left;
+            
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input.form-control, textarea.form-control {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            color: #333;
+            box-sizing: border-box;
+        }
+
+            input.form-control:focus, textarea.form-control:focus {
+                border-color: #4CAF50;
+                outline: none;
+                box-shadow: 0 0 5px #4CAF50;
+            }
+
+        input[type=radio], input[type=checkbox] {
+            margin-right: 5px;
+        }
+
+        .btn-register {
+            width: 100%;
+            background-color: #4CAF50;
+            border: none;
+            padding: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-register:hover {
+                background-color: #45a049;
+            }
+
+        p {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+            p a {
+                color: #2196F3;
+                text-decoration: none;
+            }
+
+                p a:hover {
+                    text-decoration: underline;
+                }
+
+            p.message-error {
+                color: red;
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            p.message-success {
+                color: green;
+                text-align: center;
+                margin-top: 10px;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="register-box">
+        <h2>Register</h2>
+        <form asp-action="registration">
+            <label>Name</label>
+            <input asp-for="name" class="form-control" autocomplete="off" />
+
+            <label>Password</label>
+            <input name="pass" type="password" class="form-control" autocomplete="off" />
+
+            <label>Confirm Password</label>
+            <input name="confpass" type="password" class="form-control" autocomplete="off" />
+
+            <label>Email</label>
+            <input asp-for="email" type="email" class="form-control" />
+
+            <label>Job</label>
+            <input asp-for="job" class="form-control" />
+
+            <label>Gender</label><br />
+            <input type="radio" asp-for="gender" value="Male" /> Male
+            <input type="radio" asp-for="gender" value="Female" /> Female
+
+            <label>Married</label>
+            <input asp-for="married" type="checkbox" />
+
+            <label>Location</label>
+            <textarea asp-for="location" class="form-control"></textarea>
+
+            <input type="submit" value="Register" class="btn-register" />
+
+            <p>Already registered? <a href="/usersaccounts/login">Login here</a></p>
+
+            <p class="message-error">@ViewData["message"]</p>
+            <p class="message-success">@ViewData["success"]</p>
+        </form>
+    </div>
+</body>
