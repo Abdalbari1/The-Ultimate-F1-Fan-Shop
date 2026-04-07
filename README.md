@@ -1,2 +1,2 @@
 # The-Ultimate-F1-Fan-Shop
-The Formula 1 car store website was built using the .NET Core MVC framework, Entity Framework, and SQL Server database, and most security standards were implemented.
+A robust Formula 1 e-commerce platform engineered with .NET Core MVC and Entity Framework. The system leverages SQL Server for high-performance data management and integrates industry-standard security protocols to ensure a secure user experience.
